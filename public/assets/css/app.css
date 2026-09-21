@@ -1,0 +1,81 @@
+:root {
+    --primary-color: #4f46e5;
+    --primary-dark: #312e81;
+    --secondary-color: #14b8a6;
+    --success-color: #16a34a;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #0ea5e9;
+    --background-color: #f5f7ff;
+    --surface-color: #ffffff;
+    --card-color: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --border-color: rgba(15, 23, 42, 0.08);
+    --shadow-sm: 0 8px 24px rgba(79, 70, 229, 0.06);
+    --shadow-md: 0 18px 45px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 30px 60px rgba(15, 23, 42, 0.10);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+}
+
+body[data-theme="dark"] {
+    --background-color: #0f172a;
+    --surface-color: #111827;
+    --card-color: #1f2937;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --border-color: rgba(148, 163, 184, 0.12);
+    --shadow-sm: 0 8px 24px rgba(2, 6, 23, 0.38);
+    --shadow-md: 0 18px 45px rgba(2, 6, 23, 0.44);
+}
+
+body {
+    background: var(--background-color);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.card, .panel, .stat-card, .pg-card, .room-card {
+    background: var(--card-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border: none;
+    color: #fff;
+}
+
+.btn-primary-custom:hover {
+    filter: brightness(0.98);
+}
+
+.theme-toggle {
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-primary);
+}
+
+.toast {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    min-width: 260px;
+    background: #111827;
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: 0.2s ease;
+    z-index: 2000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
