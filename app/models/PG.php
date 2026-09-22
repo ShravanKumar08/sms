@@ -69,9 +69,9 @@ class PG
         return $stmt->fetchAll();
     }
 
-    public static function create(array $data, int $ownerId): int
+    public static function create(array $data, int $ownerId, bool $isApproved = false): int
     {
-        $stmt = Database::pdo()->prepare('INSERT INTO pgs (owner_id, name, city, area, address, price_from, gender, room_type, is_approved, is_active, rating) VALUES (:owner_id, :name, :city, :area, :address, :price_from, :gender, :room_type, 0, 1, 0)');
+        $stmt = Database::pdo()->prepare('INSERT INTO pgs (owner_id, name, city, area, address, price_from, gender, room_type, is_approved, is_active, rating) VALUES (:owner_id, :name, :city, :area, :address, :price_from, :gender, :room_type, :is_approved, 1, 0)');
         $stmt->execute([
             'owner_id' => $ownerId,
             'name' => $data['name'],
@@ -81,6 +81,7 @@ class PG
             'price_from' => $data['price_from'],
             'gender' => $data['gender'],
             'room_type' => $data['room_type'],
+            'is_approved' => $isApproved ? 1 : 0,
         ]);
 
         return (int) Database::pdo()->lastInsertId();

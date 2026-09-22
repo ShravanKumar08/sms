@@ -142,6 +142,59 @@ if ($path === 'admin/student/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/admin/users');
 }
 
+if ($path === 'admin/owner/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireRole(['super_admin']);
+    $ownerName = trim((string) ($_POST['full_name'] ?? ''));
+    $ownerEmail = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?: '';
+    $ownerPassword = (string) ($_POST['password'] ?? '');
+    $pgName = trim((string) ($_POST['pg_name'] ?? ''));
+
+    if (verify_csrf() && $ownerName !== '' && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL) && $ownerPassword !== '' && $pgName !== '') {
+        if (User::findByEmail($ownerEmail)) {
+            set_flash('error', 'That email is already registered.');
+            redirect('/admin/owners');
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        try {
+            $ownerId = User::createPgOwner($ownerName, $ownerEmail, $ownerPassword);
+            PG::create([
+                'name' => $pgName, 'city' => trim($_POST['pg_city'] ?? ''), 'area' => trim($_POST['pg_area'] ?? ''),
+                'address' => trim($_POST['pg_address'] ?? ''), 'price_from' => (float) ($_POST['pg_price_from'] ?? 0),
+                'gender' => $_POST['pg_gender'] ?? 'co_living', 'room_type' => $_POST['pg_room_type'] ?? 'double',
+            ], $ownerId, true);
+            $pdo->commit();
+            set_flash('success', 'PG owner and property created.');
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            set_flash('error', 'Could not create the PG owner. Please try again.');
+        }
+    } else {
+        set_flash('error', 'Owner name, email, password, and property name are required.');
+    }
+    redirect('/admin/owners');
+}
+
+if ($path === 'admin/pg/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireRole(['super_admin']);
+    $ownerId = (int) ($_POST['owner_id'] ?? 0);
+    $pgName = trim((string) ($_POST['pg_name'] ?? ''));
+    $owner = $ownerId > 0 ? User::findById($ownerId) : null;
+
+    if (verify_csrf() && $owner && $owner['role'] === 'pg_owner' && $pgName !== '') {
+        PG::create([
+            'name' => $pgName, 'city' => trim($_POST['pg_city'] ?? ''), 'area' => trim($_POST['pg_area'] ?? ''),
+            'address' => trim($_POST['pg_address'] ?? ''), 'price_from' => (float) ($_POST['pg_price_from'] ?? 0),
+            'gender' => $_POST['pg_gender'] ?? 'co_living', 'room_type' => $_POST['pg_room_type'] ?? 'double',
+        ], $ownerId, true);
+        set_flash('success', 'Property added for ' . $owner['full_name'] . '.');
+    } else {
+        set_flash('error', 'Please choose an owner and enter a property name.');
+    }
+    redirect('/admin/pgs');
+}
+
 if ($path === 'admin/student/toggle' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireRole(['super_admin']);
     if (verify_csrf()) {

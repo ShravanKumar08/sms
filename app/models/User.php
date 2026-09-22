@@ -55,6 +55,23 @@ class User
         return (int) Database::pdo()->lastInsertId();
     }
 
+    public static function allPgOwners(): array
+    {
+        $stmt = Database::pdo()->query('SELECT users.id, users.full_name, users.email, users.is_active, GROUP_CONCAT(pgs.name, ", ") AS properties FROM users LEFT JOIN pgs ON pgs.owner_id = users.id WHERE users.role = "pg_owner" GROUP BY users.id ORDER BY users.created_at DESC');
+        return $stmt->fetchAll();
+    }
+
+    public static function createPgOwner(string $name, string $email, string $password): int
+    {
+        $stmt = Database::pdo()->prepare('INSERT INTO users (full_name, email, password_hash, role, is_active) VALUES (:name, :email, :password_hash, "pg_owner", 1)');
+        $stmt->execute([
+            'name' => $name,
+            'email' => $email,
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+        ]);
+        return (int) Database::pdo()->lastInsertId();
+    }
+
     public static function toggleActive(int $id): bool
     {
         $stmt = Database::pdo()->prepare('UPDATE users SET is_active = CASE WHEN is_active = 1 THEN 0 ELSE 1 END WHERE id = :id AND role = "student"');
